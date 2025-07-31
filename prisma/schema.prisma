@@ -1,0 +1,287 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REVERSED
+  EXPIRED
+}
+
+enum TransactionType {
+  TRANSFER
+  TRANSFER_IN
+  TRANSFER_OUT
+  DEPOSIT
+  WITHDRAWAL
+  FEE
+  REFUND
+  REVERSAL
+  SCHEDULED_PAYMENT
+  INTEREST_PAYMENT
+}
+
+enum AuditAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  TRANSACTION_CREATE
+  TRANSACTION_COMPLETE
+  TRANSACTION_FAIL
+  TRANSACTION_READ
+  TRANSFER_OUT
+  TRANSFER_IN
+  DEPOSIT
+  WITHDRAWAL
+  ACCOUNT_VIEWED
+  BALANCE_CHECKED
+  STATEMENT_VIEWED
+  ACCOUNT_FROZEN
+  ACCOUNT_UNFROZEN
+  BULK_ACTIVATE
+  BULK_DEACTIVATE
+  BULK_DELETE
+  BULK_OPERATION
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  firstName String?
+  lastName  String?
+  role      UserRole @default(USER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  account       Account?
+  auditLogs     AuditLog[]
+  notifications Notification[]
+
+  @@map("users")
+}
+
+model Account {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  balance   Decimal  @default(0.00) @db.Decimal(15, 2)
+  currency  String   @default("USD")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Transaction limits
+  dailyTransferLimit    Decimal @default(10000.00) @db.Decimal(15, 2)
+  weeklyTransferLimit   Decimal @default(50000.00) @db.Decimal(15, 2)
+  monthlyTransferLimit  Decimal @default(200000.00) @db.Decimal(15, 2)
+  singleTransferLimit   Decimal @default(5000.00) @db.Decimal(15, 2)
+  
+  dailyWithdrawalLimit  Decimal @default(2000.00) @db.Decimal(15, 2)
+  weeklyWithdrawalLimit Decimal @default(10000.00) @db.Decimal(15, 2)
+  monthlyWithdrawalLimit Decimal @default(40000.00) @db.Decimal(15, 2)
+  singleWithdrawalLimit Decimal @default(1000.00) @db.Decimal(15, 2)
+
+  // Relations
+  user                  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sentTransactions      Transaction[]      @relation("FromAccount")
+  receivedTransactions  Transaction[]      @relation("ToAccount")
+  transactionLimits     TransactionLimit[]
+  notifications         Notification[]
+
+  @@map("accounts")
+}
+
+model Transaction {
+  id              String            @id @default(cuid())
+  fromAccountId   String
+  toAccountId     String
+  amount          Decimal           @db.Decimal(15, 2)
+  fee             Decimal           @default(0.00) @db.Decimal(15, 2)
+  description     String?
+  status          TransactionStatus @default(PENDING)
+  type            TransactionType   @default(TRANSFER)
+  reference       String?           @unique
+  externalRef     String?           // For external system references
+  processingTime  DateTime?         // When processing started
+  completedAt     DateTime?         // When transaction was completed
+  failedReason    String?           // Reason for failure
+  reversalOf      String?           // ID of original transaction if this is a reversal
+  metadata        Json?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  // Relations
+  fromAccount     Account           @relation("FromAccount", fields: [fromAccountId], references: [id])
+  toAccount       Account           @relation("ToAccount", fields: [toAccountId], references: [id])
+  fees            TransactionFee[]
+  reversals       Transaction[]     @relation("TransactionReversal")
+  originalTransaction Transaction?  @relation("TransactionReversal", fields: [reversalOf], references: [id])
+  notifications   Notification[]
+
+  @@map("transactions")
+}
+
+model TransactionLimit {
+  id          String    @id @default(cuid())
+  accountId   String
+  limitType   LimitType
+  limitPeriod LimitPeriod
+  amount      Decimal   @db.Decimal(15, 2)
+  usedAmount  Decimal   @default(0.00) @db.Decimal(15, 2)
+  resetAt     DateTime
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, limitType, limitPeriod])
+  @@map("transaction_limits")
+}
+
+model TransactionFee {
+  id            String      @id @default(cuid())
+  transactionId String
+  feeType       FeeType
+  amount        Decimal     @db.Decimal(15, 2)
+  description   String?
+  createdAt     DateTime    @default(now())
+
+  // Relations
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@map("transaction_fees")
+}
+
+model ScheduledTransaction {
+  id              String              @id @default(cuid())
+  fromAccountId   String
+  toAccountId     String
+  amount          Decimal             @db.Decimal(15, 2)
+  description     String?
+  frequency       TransactionFrequency
+  nextExecution   DateTime
+  lastExecution   DateTime?
+  endDate         DateTime?
+  maxExecutions   Int?
+  executionCount  Int                 @default(0)
+  isActive        Boolean             @default(true)
+  metadata        Json?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@map("scheduled_transactions")
+}
+
+model Notification {
+  id          String           @id @default(cuid())
+  userId      String?
+  accountId   String?
+  transactionId String?
+  type        NotificationType
+  title       String
+  message     String
+  isRead      Boolean          @default(false)
+  readAt      DateTime?
+  metadata    Json?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  expiresAt   DateTime?
+
+  // Relations
+  user        User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account     Account?     @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  transaction Transaction? @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  userId      String?
+  action      AuditAction
+  resource    String      // e.g., "User", "Account", "Transaction"
+  resourceId  String?     // ID of the affected resource
+  oldValues   Json?       // Previous values (for updates)
+  newValues   Json?       // New values (for creates/updates)
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?       // Additional context
+  createdAt   DateTime    @default(now())
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+
+
+enum LimitType {
+  TRANSFER
+  WITHDRAWAL
+  DEPOSIT
+}
+
+enum LimitPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum FeeType {
+  TRANSACTION_FEE
+  SERVICE_FEE
+  WITHDRAWAL_FEE
+  TRANSFER_FEE
+  CURRENCY_CONVERSION
+  OVERDRAFT_FEE
+  MAINTENANCE_FEE
+}
+
+enum TransactionFrequency {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+enum NotificationType {
+  TRANSACTION_COMPLETED
+  TRANSACTION_FAILED
+  ACCOUNT_FROZEN
+  ACCOUNT_UNFROZEN
+  LOW_BALANCE
+  HIGH_BALANCE
+  LIMIT_REACHED
+  SCHEDULED_PAYMENT
+  SECURITY_ALERT
+  SYSTEM_MAINTENANCE
+}
+

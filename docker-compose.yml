@@ -1,0 +1,38 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: financial-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: financial_db
+      POSTGRES_USER: financial_user
+      POSTGRES_PASSWORD: financial_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - financial-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: financial-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - financial-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  financial-network:
+    driver: bridge 
