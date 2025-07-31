@@ -1,7 +1,6 @@
 import { ApolloServer } from '@apollo/server';
 import { buildSchema } from 'type-graphql';
 import { AuthResolver } from './resolvers/authResolver';
-import { AuditResolver } from './resolvers/auditResolver';
 import { DashboardResolver } from './resolvers/dashboardResolver';
 import { GraphQLContext } from './context';
 import { logger } from '../utils/logger';
@@ -13,7 +12,7 @@ import { JwtUtil } from '../utils/jwt';
 
 export async function createApolloServer(httpServer: http.Server): Promise<ApolloServer> {
   const schema = await buildSchema({
-    resolvers: [AuthResolver, AuditResolver, DashboardResolver],
+    resolvers: [AuthResolver, DashboardResolver],
     authChecker: ({ context }, roles: string[]) => {
       const { user } = context as GraphQLContext;
 

@@ -29,23 +29,45 @@ const swaggerDefinition = {
   },
   security: [{ bearerAuth: [] }],
   tags: [
-    { name: 'Auth', description: 'Authentication & JWT' },
+    { name: 'Authentication', description: 'Authentication & JWT' },
     { name: 'Users', description: 'User management' },
     { name: 'Accounts', description: 'Account operations' },
     { name: 'Transactions', description: 'Transaction operations' },
     { name: 'Notifications', description: 'Notification system' },
     { name: 'Dashboards', description: 'Analytics & KPIs' },
-    { name: 'Audit', description: 'Audit logs & security' },
   ],
 };
 
 const options = {
   swaggerDefinition,
-  apis: ['./src/routes/*.ts', './src/controllers/*.ts'],
+  apis: [
+    './src/docs/*.yaml',
+    './src/docs/*.yml',
+    './src/docs/*.js'
+  ],
+  explorer: true,
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Financial Transaction System API',
 };
 
 const swaggerSpec = swaggerJsdoc(options);
 
 export function setupSwagger(app: Express) {
-  app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  // Debug endpoint to check swagger spec
+  app.get('/swagger.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
+  });
+
+  app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+    explorer: true,
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'Financial Transaction System API',
+    swaggerOptions: {
+      docExpansion: 'list',
+      filter: true,
+      showRequestHeaders: true,
+      showCommonExtensions: true,
+    },
+  }));
 }

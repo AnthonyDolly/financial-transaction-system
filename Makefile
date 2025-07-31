@@ -130,7 +130,7 @@ prod-build: ## Construir imagen de producción
 		$(call print_error,"No se encontró el archivo $(ENV_PROD). Crea uno basado en env.prod.example"); \
 		exit 1; \
 	fi
-	@docker compose -f $(DOCKER_COMPOSE_PROD) build --no-cache
+	@docker compose -f $(DOCKER_COMPOSE_PROD) --env-file $(ENV_PROD) build --no-cache
 	$(call print_message,"✅ Imagen de producción construida")
 
 .PHONY: prod-up
