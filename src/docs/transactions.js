@@ -17,6 +17,8 @@
  *           example: "cmddybmub0007vt4g9c57c5so"
  *         amount:
  *           type: number
+ *           format: double
+ *           minimum: 0.01
  *           example: 500.00
  *         description:
  *           type: string
@@ -147,6 +149,24 @@
  *                   properties:
  *                     data:
  *                       $ref: '#/components/schemas/TransactionValidation'
+ *       400:
+ *         description: Bad request - validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       401:
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       403:
+ *         description: Access denied
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *
  * /api/v1/transactions:
  *   post:
@@ -174,10 +194,22 @@
  *                       $ref: '#/components/schemas/TransactionResponse'
  *       400:
  *         description: Invalid transaction data or insufficient funds
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       403:
  *         description: Access denied
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Account not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *
  * /api/v1/transactions/{id}:
  *   get:
@@ -206,8 +238,16 @@
  *                       $ref: '#/components/schemas/TransactionResponse'
  *       403:
  *         description: Access denied
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Transaction not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *
  * /api/v1/transactions/my:
  *   get:
@@ -316,8 +356,20 @@
  *                       $ref: '#/components/schemas/TransactionResponse'
  *       400:
  *         description: Cannot reverse transaction
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       403:
  *         description: Admin access required
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  *       404:
  *         description: Transaction not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
  */ 

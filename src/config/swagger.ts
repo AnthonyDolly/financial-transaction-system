@@ -40,14 +40,7 @@ const swaggerDefinition = {
 
 const options = {
   swaggerDefinition,
-  apis: [
-    './src/docs/*.yaml',
-    './src/docs/*.yml',
-    './src/docs/*.js'
-  ],
-  explorer: true,
-  customCss: '.swagger-ui .topbar { display: none }',
-  customSiteTitle: 'Financial Transaction System API',
+  apis: ['./src/docs/*.yaml', './src/docs/*.yml', './src/docs/*.js'],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
@@ -59,15 +52,19 @@ export function setupSwagger(app: Express) {
     res.send(swaggerSpec);
   });
 
-  app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
-    explorer: true,
-    customCss: '.swagger-ui .topbar { display: none }',
-    customSiteTitle: 'Financial Transaction System API',
-    swaggerOptions: {
-      docExpansion: 'list',
-      filter: true,
-      showRequestHeaders: true,
-      showCommonExtensions: true,
-    },
-  }));
+  app.use(
+    '/docs',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec, {
+      explorer: true,
+      customCss: '.swagger-ui .topbar { display: none }',
+      customSiteTitle: 'Financial Transaction System API',
+      swaggerOptions: {
+        docExpansion: 'list',
+        filter: true,
+        showRequestHeaders: true,
+        showCommonExtensions: true,
+      },
+    })
+  );
 }

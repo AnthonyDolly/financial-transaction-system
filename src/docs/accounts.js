@@ -72,6 +72,47 @@
  *         metadata:
  *           type: object
  *
+ *     ApiResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *           example: "Request successful"
+ *         data:
+ *           type: object
+ *           nullable: true
+ *           description: Response payload (varies by endpoint)
+ *
+ *     PaginatedResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: true
+ *         message:
+ *           type: string
+ *           example: "Request successful"
+ *         page:
+ *           type: integer
+ *           example: 1
+ *         limit:
+ *           type: integer
+ *           example: 20
+ *         totalPages:
+ *           type: integer
+ *           example: 5
+ *         totalItems:
+ *           type: integer
+ *           example: 100
+ *         data:
+ *           type: array
+ *           items:
+ *             type: object
+ *           description: Paginated data array
+ *
  * /api/v1/accounts/me:
  *   get:
  *     summary: Get my account information
@@ -160,6 +201,15 @@
  *     responses:
  *       200:
  *         description: Deposit completed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/Transaction'
  *       404:
  *         description: Account not found
  *
@@ -195,6 +245,15 @@
  *     responses:
  *       200:
  *         description: Withdrawal completed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/Transaction'
  *       400:
  *         description: Insufficient funds
  *       404:
@@ -365,6 +424,22 @@
  *     responses:
  *       200:
  *         description: Transfer completed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/ApiResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: object
+ *                       properties:
+ *                         transaction:
+ *                           $ref: '#/components/schemas/Transaction'
+ *                         fromAccount:
+ *                           $ref: '#/components/schemas/Account'
+ *                         toAccount:
+ *                           $ref: '#/components/schemas/Account'
  *       400:
  *         description: Invalid request or insufficient funds
  *       403:

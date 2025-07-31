@@ -68,7 +68,7 @@ WORKDIR /app
 # Copiar archivos necesarios desde el stage de build
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/src/docs ./src/docs
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
+COPY --from=base    --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
 COPY --from=builder --chown=nodejs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nodejs:nodejs /app/tsconfig.json ./

@@ -215,6 +215,33 @@
  *                   properties:
  *                     data:
  *                       $ref: '#/components/schemas/NotificationResponse'
+ *       400:
+ *         description: Bad request - validation failure
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               message: "Validation failed"
+ *               error: "VALIDATION_ERROR"
+ *               details:
+ *                 field: "title"
+ *                 message: "Title is required"
+ *               timestamp: "2024-01-01T00:00:00.000Z"
+ *       401:
+ *         description: Unauthorized - missing or invalid bearer token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *             example:
+ *               success: false
+ *               message: "Unauthorized access"
+ *               error: "UNAUTHORIZED"
+ *               details:
+ *                 message: "Invalid or missing authentication token"
+ *               timestamp: "2024-01-01T00:00:00.000Z"
  *       403:
  *         description: Admin access required
  *

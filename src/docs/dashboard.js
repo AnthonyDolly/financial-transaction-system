@@ -30,66 +30,87 @@
  *       type: object
  *       properties:
  *         totalTransactions:
- *           type: number
+ *           type: integer
+ *           format: int64
  *         totalAmount:
  *           type: number
+ *           format: double
  *         averageAmount:
  *           type: number
+ *           format: double
  *         successRate:
  *           type: number
+ *           format: float
  *           description: Percentage of successful transactions
  *         failureRate:
  *           type: number
+ *           format: float
  *           description: Percentage of failed transactions
  *     
  *     AccountMetrics:
  *       type: object
  *       properties:
  *         totalAccounts:
- *           type: number
+ *           type: integer
+ *           format: int64
  *         activeAccounts:
- *           type: number
+ *           type: integer
+ *           format: int64
  *         totalBalance:
  *           type: number
+ *           format: double
  *         averageBalance:
  *           type: number
+ *           format: double
  *     
  *     UserMetrics:
  *       type: object
  *       properties:
  *         totalUsers:
- *           type: number
+ *           type: integer
+ *           format: int64
  *         activeUsers:
- *           type: number
+ *           type: integer
+ *           format: int64
  *         newUsers:
- *           type: number
+ *           type: integer
+ *           format: int64
  *         dailyActiveUsers:
- *           type: number
+ *           type: integer
+ *           format: int64
  *     
  *     SecurityMetrics:
  *       type: object
  *       properties:
  *         totalSecurityAlerts:
- *           type: number
+ *           type: integer
+ *           format: int64
  *         criticalAlerts:
- *           type: number
+ *           type: integer
+ *           format: int64
  *         failedLoginAttempts:
- *           type: number
+ *           type: integer
+ *           format: int64
  *         suspiciousIpAddresses:
- *           type: number
+ *           type: integer
+ *           format: int64
  *     
  *     FinancialKPIs:
  *       type: object
  *       properties:
  *         totalRevenue:
  *           type: number
+ *           format: double
  *         revenueGrowth:
  *           type: number
+ *           format: float
  *           description: Percentage growth
  *         transactionVolume:
- *           type: number
+ *           type: integer
+ *           format: int64
  *         volumeGrowth:
  *           type: number
+ *           format: float
  *           description: Percentage growth
  *     
  *     SystemHealth:
@@ -97,12 +118,16 @@
  *       properties:
  *         uptime:
  *           type: number
+ *           format: float
  *         responseTime:
  *           type: number
+ *           format: float
  *         errorRate:
  *           type: number
+ *           format: float
  *         activeConnections:
- *           type: number
+ *           type: integer
+ *           format: int64
  *
  * /api/v1/dashboards/overview:
  *   get:
