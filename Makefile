@@ -65,7 +65,9 @@ help: ## Mostrar esta ayuda
 	@echo -e "$(GREEN)MANTENIMIENTO:$(NC)"
 	@echo "  make clean         - Limpiar contenedores e imágenes"
 	@echo "  make clean-all     - Limpiar todo (requiere confirmación)"
-	@echo "  make clean-all-confirm - Limpiar todo (confirmado)"
+	@echo "  make clean-all-confirm - Limpiar todo (contenedores, imágenes, volúmenes no utilizados)"
+	@echo "  make clean-project-volumes - Eliminar volúmenes del proyecto (requiere confirmación)"
+	@echo "  make clean-project-volumes-confirm - Eliminar volúmenes del proyecto (confirmado)"
 	@echo "  make prune         - Limpiar recursos no utilizados"
 	@echo "  make backup        - Backup de volúmenes"
 	@echo "  make restore       - Restaurar desde backup (requiere parámetro)"
@@ -241,7 +243,7 @@ logs-redis: ## Logs de Redis
 clean: ## Limpiar contenedores e imágenes
 	$(call print_step,"🧹 Limpiando contenedores e imágenes...")
 	@docker compose down
-	@docker compose -f $(DOCKER_COMPOSE_PROD) down
+	@docker compose -f $(DOCKER_COMPOSE_PROD) --env-file $(ENV_PROD) down
 	@docker system prune -f
 	@docker image prune -f
 	$(call print_message,"✅ Limpieza completada")
@@ -254,17 +256,35 @@ clean-all: ## Limpiar todo (contenedores, imágenes, volúmenes)
 	@echo "💡 Usa 'make clean-all-confirm' para ejecutar la limpieza completa"
 
 .PHONY: clean-all-confirm
-clean-all-confirm: ## Limpiar todo (confirmado)
+clean-all-confirm: ## Limpiar todo (contenedores, imágenes, volúmenes no utilizados)
 	$(call print_warning,"⚠️ Ejecutando limpieza completa...")
 	@$(MAKE) clean
 	@docker volume prune -f
 	@docker network prune -f
+	@docker system prune -f --volumes
 	$(call print_message,"✅ Limpieza completa realizada")
+
+
+
+.PHONY: clean-project-volumes
+clean-project-volumes: ## Eliminar solo volúmenes del proyecto actual
+	$(call print_warning,"⚠️ Eliminando volúmenes del proyecto: $(PROJECT_NAME)")
+	$(call print_warning,'⚠️ Para confirmar, ejecuta: make clean-project-volumes-confirm')
+	@echo "❌ Operación cancelada por seguridad"
+	@echo "💡 Usa 'make clean-project-volumes-confirm' para ejecutar la eliminación"
+
+.PHONY: clean-project-volumes-confirm
+clean-project-volumes-confirm: ## Eliminar solo volúmenes del proyecto actual (confirmado)
+	$(call print_warning,"⚠️ Eliminando volúmenes del proyecto: $(PROJECT_NAME)")
+	@$(MAKE) clean
+	@docker volume ls -q | grep "$(PROJECT_NAME)" | xargs -r docker volume rm -f
+	@docker network prune -f
+	$(call print_message,"✅ Volúmenes del proyecto eliminados")
 
 .PHONY: prune
 prune: ## Limpiar recursos no utilizados
 	$(call print_step,"🧹 Limpiando recursos no utilizados...")
-	@docker system prune -f
+	@docker system prune -f --volumes
 	@docker image prune -f
 	@docker volume prune -f
 	@docker network prune -f
