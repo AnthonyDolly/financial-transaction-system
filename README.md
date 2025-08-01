@@ -1,29 +1,32 @@
 # Financial Transaction System
 
 ## Overview
-A robust, enterprise-grade financial transaction backend system built with Node.js, TypeScript, Express, PostgreSQL (Prisma), Kafka, Redis, JWT Auth, GraphQL, and advanced security. Designed for extensibility, auditability, and real-time analytics.
+
+A robust, enterprise-grade financial transaction backend system built with Node.js, TypeScript, Express, PostgreSQL (Prisma), Redis, JWT Auth, GraphQL, and advanced security. Designed for extensibility, auditability, and real-time analytics.
 
 ## Features
+
 - **RESTful API** (Express.js)
 - **GraphQL API** (Apollo Server, TypeGraphQL)
 - **PostgreSQL** (Prisma ORM)
-- **Kafka** (Event-driven architecture)
-- **Redis** (Caching, rate limiting)
+- **Redis** (Caching, rate limiting, session storage)
 - **JWT Authentication & RBAC**
 - **Audit Logging & Security Alerts**
 - **Dashboards & Analytics**
 - **Notification System** (Email, SMS, Push)
 - **Comprehensive Testing** (Jest, Supertest, E2E)
-- **CI/CD** (GitHub Actions, Docker)
 - **OWASP Security Best Practices**
 
 ## Architecture
-- Layered: API Gateway, Services, Data Access, Infrastructure
-- Event-driven: Kafka for all critical events (transactions, audit, notifications)
-- GraphQL and REST endpoints for all business domains
-- Centralized error handling, logging, and validation
+
+- **Layered Architecture**: Services, Data Access, Infrastructure
+- **Synchronous Processing**: Direct database operations with Redis caching
+- **GraphQL and REST endpoints** for all business domains
+- **Centralized error handling, logging, and validation**
+- **Real-time notifications** via direct service calls
 
 ## Local Setup
+
 1. **Clone the repo:**
    ```sh
    git clone <repo-url>
@@ -34,7 +37,7 @@ A robust, enterprise-grade financial transaction backend system built with Node.
    cp env-template.txt .env
    # Edit .env with your local/Dev credentials
    ```
-3. **Start Docker services (Postgres, Redis, Kafka):**
+3. **Start Docker services (Postgres, Redis):**
    ```sh
    docker-compose up -d
    ```
@@ -53,6 +56,7 @@ A robust, enterprise-grade financial transaction backend system built with Node.
    ```
 
 ## Running Tests
+
 - **Unit tests:**
   ```sh
   npm run test:unit
@@ -67,6 +71,7 @@ A robust, enterprise-grade financial transaction backend system built with Node.
   ```
 
 ## API Documentation
+
 - **REST:**
   - Swagger UI: [http://localhost:3000/docs](http://localhost:3000/docs)
 - **GraphQL:**
@@ -77,12 +82,14 @@ A robust, enterprise-grade financial transaction backend system built with Node.
 ### Configuración Rápida
 
 1. **Configurar variables de entorno:**
+
    ```sh
    cp env.prod.example .env
    # Editar .env con tus credenciales de producción
    ```
 
 2. **Generar certificados SSL:**
+
    ```sh
    mkdir -p nginx/ssl
    openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
@@ -99,6 +106,7 @@ A robust, enterprise-grade financial transaction backend system built with Node.
 ### Comandos de Producción
 
 #### Usando Makefile (Recomendado)
+
 ```bash
 # Despliegue y monitoreo
 make prod-deploy     # Despliegue completo a producción
@@ -126,6 +134,7 @@ make quick-stop      # Parar todos los servicios
 ```
 
 #### Usando NPM Scripts (Desarrollo Local)
+
 ```bash
 # Desarrollo local
 npm run dev          # Desarrollo con nodemon
@@ -152,6 +161,7 @@ npm run db:seed      # Poblar datos de ejemplo
 ### Documentación Completa
 
 Para información detallada sobre despliegue, monitoreo y mantenimiento, consulta:
+
 - **[Makefile](Makefile)** - Comandos Docker unificados
 - **`make help`** - Ver todos los comandos disponibles
 
@@ -184,11 +194,13 @@ make quick-stop   # Parar todos los servicios
 ## 📊 Monitoreo
 
 ### Health Checks
+
 - **Aplicación:** `curl https://tu-dominio.com/health`
 - **PostgreSQL:** `docker compose -f docker-compose.prod.yml exec postgres pg_isready`
 - **Redis:** `docker compose -f docker-compose.prod.yml exec redis redis-cli ping`
 
 ### Logs
+
 ```sh
 # Logs en tiempo real
 make logs-app
@@ -207,6 +219,7 @@ make stats       # Estadísticas de Docker
 ## 🗄️ Backup y Recuperación
 
 ### Backup y Restauración
+
 ```sh
 # Backup manual
 make backup
@@ -221,6 +234,7 @@ make prune
 ## 🔒 Seguridad
 
 ### Configuraciones Recomendadas
+
 1. **Cambiar todas las contraseñas por defecto**
 2. **Usar certificados SSL reales**
 3. **Configurar firewall**
@@ -228,6 +242,7 @@ make prune
 5. **Configurar backup automático**
 
 ### Variables Críticas
+
 ```bash
 # ¡OBLIGATORIO CAMBIAR EN PRODUCCIÓN!
 JWT_SECRET=tu_super_secreto_jwt_aqui_minimo_32_caracteres
@@ -239,6 +254,7 @@ REDIS_PASSWORD=tu_contraseña_redis_segura
 ## 🚨 Troubleshooting
 
 ### Problemas Comunes
+
 1. **Aplicación no inicia:** Verificar logs con `make logs-app`
 2. **Base de datos no conecta:** Verificar variables de entorno con `make env-check`
 3. **Redis no conecta:** Verificar configuración de Redis con `make logs-redis`
@@ -246,6 +262,7 @@ REDIS_PASSWORD=tu_contraseña_redis_segura
 5. **Datos de ejemplo:** Ejecutar `make db-seed`
 
 ### Logs de Debug
+
 ```sh
 # Ver logs de la aplicación
 make logs-app
@@ -273,15 +290,15 @@ make health
 ---
 
 **⚠️ IMPORTANTE**: Siempre prueba en un entorno de staging antes de desplegar a producción.
+
 - Run migrations on Azure DB:
+
 ```sh
 DATABASE_URL=<azure-db-url> npx prisma migrate deploy
 ```
 
-### 6. **CI/CD (Optional)**
-- Use `.github/workflows/ci.yml` for automated build, test, and deploy.
-
 ## Security Checklist (OWASP)
+
 - [x] HTTPS enforced
 - [x] JWT with strong secrets & expiry
 - [x] Rate limiting (Redis)
@@ -294,12 +311,14 @@ DATABASE_URL=<azure-db-url> npx prisma migrate deploy
 - [x] Secrets managed via Azure Key Vault (recommended)
 
 ## Troubleshooting & FAQ
+
 - **DB connection errors:** Check `.env` and Azure firewall rules
-- **Kafka not available:** App will degrade gracefully, but enable for full features
+- **Redis connection issues:** Verify Redis configuration and network connectivity
 - **Tests fail:** Ensure Docker services are running, and `.env` is correct
 - **App Service errors:** Check logs in Azure Portal, verify env vars
 
 ## Contribution Guide
+
 - Fork, branch, and PR workflow
 - Write tests for new features
 - Follow code style (ESLint, Prettier)
@@ -310,6 +329,7 @@ DATABASE_URL=<azure-db-url> npx prisma migrate deploy
 ### 📋 **Separación de Responsabilidades**
 
 #### 🛠️ **npm scripts** - Desarrollo Local
+
 - **Construcción:** `npm run build`, `npm start`
 - **Desarrollo:** `npm run dev`
 - **Testing:** `npm test`, `npm run test:coverage`
@@ -317,6 +337,7 @@ DATABASE_URL=<azure-db-url> npx prisma migrate deploy
 - **Base de datos:** `npm run db:migrate`, `npm run db:studio`
 
 #### 🐳 **Makefile** - Docker y Producción
+
 - **Desarrollo:** `make dev-up`, `make dev-down`
 - **Producción:** `make prod-deploy`, `make prod-up`
 - **Monitoreo:** `make health`, `make status`, `make logs-app`
@@ -325,6 +346,7 @@ DATABASE_URL=<azure-db-url> npx prisma migrate deploy
 ### 🚀 **Flujos de Trabajo Recomendados**
 
 #### Desarrollo Local
+
 ```bash
 npm install
 npm run db:generate
@@ -333,6 +355,7 @@ npm run dev
 ```
 
 #### Desarrollo con Docker
+
 ```bash
 make quick-dev
 # o
@@ -341,6 +364,7 @@ make dev-logs
 ```
 
 #### Producción
+
 ```bash
 make prod-deploy
 make health
@@ -348,6 +372,7 @@ make logs-app
 ```
 
 ### 📚 **Documentación Adicional**
+
 - **[COMMANDS_GUIDE.md](COMMANDS_GUIDE.md)** - Guía completa de comandos
 - **[MAKEFILE_GUIDE.md](MAKEFILE_GUIDE.md)** - Documentación del Makefile
 - **[FINAL_SUMMARY.md](FINAL_SUMMARY.md)** - Resumen de la refactorización
@@ -356,4 +381,4 @@ make logs-app
 
 **💡 Tip:** Usa `make help` para ver todos los comandos disponibles.
 
-For more details, see the PRD.md and code comments. 
+For more details, see the PRD.md and code comments.
