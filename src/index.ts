@@ -20,6 +20,7 @@ import accountRoutes from './routes/accountRoutes';
 import transactionRoutes from './routes/transactionRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
+import seedRoutes from './routes/seedRoutes';
 
 const app = express();
 
@@ -72,6 +73,7 @@ app.use(`${config.API_PREFIX}/accounts`, accountRoutes);
 app.use(`${config.API_PREFIX}/transactions`, transactionRoutes);
 app.use(`${config.API_PREFIX}/notifications`, notificationRoutes);
 app.use(`${config.API_PREFIX}/dashboards`, dashboardRoutes);
+app.use(`${config.API_PREFIX}/seed`, seedRoutes);
 
 // Root API endpoint
 app.get(config.API_PREFIX, (req, res) => {
@@ -88,6 +90,7 @@ app.get(config.API_PREFIX, (req, res) => {
       accounts: `${config.API_PREFIX}/accounts`,
       transactions: `${config.API_PREFIX}/transactions`,
       notifications: `${config.API_PREFIX}/notifications`,
+      seed: `${config.API_PREFIX}/seed`,
     },
   });
 });
