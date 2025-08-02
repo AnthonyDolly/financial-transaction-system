@@ -204,7 +204,7 @@ health: ## Health check de servicios
 	@docker compose -f $(DOCKER_COMPOSE_PROD) --env-file $(ENV_PROD) ps --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
 	@echo
 	@echo "🌐 HEALTH CHECKS:"
-	@curl -f http://localhost:3000/health > /dev/null 2>&1 && echo "✅ Aplicación: OK" || echo "❌ Aplicación: FAILED"
+	@docker compose -f $(DOCKER_COMPOSE_PROD) --env-file $(ENV_PROD) exec -T app curl -f http://localhost:3000/health > /dev/null 2>&1 && echo "✅ Aplicación: OK" || echo "❌ Aplicación: FAILED"
 	@docker compose -f $(DOCKER_COMPOSE_PROD) --env-file $(ENV_PROD) exec -T postgres pg_isready > /dev/null 2>&1 && echo "✅ PostgreSQL: OK" || echo "❌ PostgreSQL: FAILED"
 	@docker compose -f $(DOCKER_COMPOSE_PROD) --env-file $(ENV_PROD) exec -T redis redis-cli ping > /dev/null 2>&1 && echo "✅ Redis: OK" || echo "❌ Redis: FAILED"
 	@echo "=========================================="
