@@ -28,12 +28,36 @@ const httpServer = http.createServer(app);
 
 // Security middleware
 app.use(helmet());
-app.use(
-  cors({
-    origin: config.NODE_ENV === 'production' ? config.ALLOWED_ORIGINS : true,
-    credentials: true,
-  })
-);
+
+// Trust proxy configuration for production
+if (config.TRUST_PROXY) {
+  app.set('trust proxy', 1);
+}
+// CORS configuration
+const corsOptions = {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (config.NODE_ENV === 'development') {
+      return callback(null, true);
+    }
+    
+    // Parse allowed origins from environment variable
+    const allowedOrigins = config.ALLOWED_ORIGINS?.split(',').map(origin => origin.trim()) || [];
+    
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      return callback(null, true);
+    }
+    
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+};
+
+app.use(cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -168,10 +192,7 @@ async function initializeApp() {
     // Apply GraphQL middleware
     app.use(
       '/graphql',
-      cors<cors.CorsRequest>({
-        origin: config.NODE_ENV === 'production' ? config.ALLOWED_ORIGINS : true,
-        credentials: true,
-      }),
+      cors<cors.CorsRequest>(corsOptions),
       express.json(),
       expressMiddleware(apolloServer, {
         context: createGraphQLContext,

@@ -14,10 +14,14 @@ const swaggerDefinition = {
       email: config.SWAGGER_CONTACT_EMAIL,
     },
   },
-  servers: [
-    { url: 'http://localhost:3000', description: 'Local Dev' },
-    { url: `https://${config.AZURE_APP_NAME}.azurewebsites.net`, description: 'Azure Production' },
-  ],
+  servers: config.NODE_ENV === 'development' 
+    ? [
+        { url: 'http://localhost:3000', description: 'Local Development' },
+        { url: config.AZURE_APP_NAME, description: 'Production' },
+      ]
+    : [
+        { url: config.AZURE_APP_NAME, description: 'Production' },
+      ],
   components: {
     securitySchemes: {
       bearerAuth: {
@@ -57,13 +61,20 @@ export function setupSwagger(app: Express) {
     swaggerUi.serve,
     swaggerUi.setup(swaggerSpec, {
       explorer: true,
-      customCss: '.swagger-ui .topbar { display: none }',
+      customCss: config.NODE_ENV === 'production' 
+        ? '.swagger-ui .topbar { display: none } .swagger-ui .servers { display: none !important; } .swagger-ui .servers-title { display: none !important; }'
+        : '.swagger-ui .topbar { display: none }',
       customSiteTitle: 'Financial Transaction System API',
       swaggerOptions: {
         docExpansion: 'list',
         filter: true,
         showRequestHeaders: true,
         showCommonExtensions: true,
+        // Hide server selector in production
+        ...(config.NODE_ENV === 'production' && { 
+          defaultModelsExpandDepth: -1,
+          defaultModelExpandDepth: 1,
+        }),
       },
     })
   );
