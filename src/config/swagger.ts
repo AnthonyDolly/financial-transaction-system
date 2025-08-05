@@ -14,12 +14,12 @@ const swaggerDefinition = {
       email: config.SWAGGER_CONTACT_EMAIL,
     },
   },
-  servers: config.NODE_ENV === 'development' 
+  servers: config.NODE_ENV === 'production' 
     ? [
-        { url: 'http://localhost:3000', description: 'Local Development' },
         { url: config.AZURE_APP_NAME, description: 'Production' },
       ]
     : [
+        { url: 'http://localhost:3000', description: 'Local Development' },
         { url: config.AZURE_APP_NAME, description: 'Production' },
       ],
   components: {
